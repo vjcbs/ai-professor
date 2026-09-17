@@ -425,28 +425,28 @@
     <div class="right-col">
       <h2>Your thinking map</h2>
 
-      <div class="step active">
+      <div class="step active" id="step-thesis">
         <div class="step-marker"></div>
         <div>
           <p class="step-title">Make your thesis</p>
           <p class="step-desc">State a position before we unpack it.</p>
         </div>
       </div>
-      <div class="step">
+      <div class="step" id="step-evidence">
         <div class="step-marker"></div>
         <div>
           <p class="step-title">Use case evidence</p>
           <p class="step-desc">Anchor it in a decision, fact, or figure from the case.</p>
         </div>
       </div>
-      <div class="step">
+      <div class="step" id="step-tradeoffs">
         <div class="step-marker"></div>
         <div>
           <p class="step-title">Consider tradeoffs</p>
           <p class="step-desc">Name what your recommendation risks.</p>
         </div>
       </div>
-      <div class="step">
+      <div class="step" id="step-refine">
         <div class="step-marker"></div>
         <div>
           <p class="step-title">Refine your answer</p>
@@ -557,6 +557,16 @@
       transcriptList.scrollTop = transcriptList.scrollHeight;
     }
 
+    const stageOrder = ['thesis', 'evidence', 'tradeoffs', 'refine'];
+
+    function setThinkingStage(stage) {
+      const idx = stageOrder.indexOf(stage);
+      if (idx === -1) return;
+      stageOrder.forEach((s, i) => {
+        document.getElementById('step-' + s).classList.toggle('active', i <= idx);
+      });
+    }
+
     async function startConversation() {
       if (conversation) {
         await conversation.endSession();
@@ -565,6 +575,7 @@
       }
 
       const name = nameInput.value.trim();
+      setThinkingStage('thesis'); // reset to first stage for a fresh session
       const opts = {
         agentId: AGENT_ID,
         onConnect: () => {
@@ -595,6 +606,12 @@
           orbTitle.textContent = m.mode === 'speaking' ? 'Speaking…' : 'Listening…';
         },
         onError: (e) => console.error('Conversation error:', e),
+        clientTools: {
+          update_thinking_map: ({ stage }) => {
+            setThinkingStage(stage);
+            return 'ok';
+          },
+        },
       };
 
       if (name) opts.dynamicVariables = { user_name: name, mode: selectedMode };
