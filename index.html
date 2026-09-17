@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>The Case Partner — Neurovista</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1c1a16;
+    --paper: #f6f2e9;
+    --paper-raised: #fbf8f1;
+    --navy: #1b2a4a;
+    --brass: #a9822f;
+    --rule: #ddd4bf;
+    --muted: #8a8272;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Inter', -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 56px 24px 80px;
+  }
+
+  header {
+    border-bottom: 2px solid var(--navy);
+    padding-bottom: 20px;
+    margin-bottom: 40px;
+  }
+
+  .wordmark {
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-weight: 600;
+    font-size: 30px;
+    color: var(--navy);
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+
+  .kicker {
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-style: italic;
+    font-size: 16px;
+    color: var(--muted);
+    margin: 6px 0 0;
+  }
+
+  section {
+    margin-bottom: 44px;
+  }
+
+  h2 {
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-weight: 600;
+    font-size: 19px;
+    color: var(--navy);
+    margin: 0 0 14px;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+
+  h2 .rule {
+    flex: 1;
+    height: 1px;
+    background: var(--rule);
+  }
+
+  .widget-frame {
+    background: var(--paper-raised);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 28px;
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .recap-card {
+    background: var(--paper-raised);
+    border: 1px solid var(--rule);
+    border-left: 3px solid var(--brass);
+    border-radius: 2px;
+    padding: 26px 28px;
+  }
+
+  .recap-body {
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 17px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    margin: 0;
+  }
+
+  .recap-body.waiting {
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  .recap-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #b8b09c;
+  }
+
+  .dot.live { background: #4a7c59; }
+
+  footer {
+    font-size: 13px;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 60px;
+  }
+</style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <p class="wordmark">The Case Partner</p>
+      <p class="kicker">Neurovista — Entrepreneurial Strategy</p>
+    </header>
+
+    <section>
+      <h2>Discussion<span class="rule"></span></h2>
+      <div class="widget-frame">
+        <elevenlabs-convai
+          agent-id="agent_5801m1w335epekzvayexhg7cpxes"
+          variant="expanded"
+          avatar-orb-color-1="#1b2a4a"
+          avatar-orb-color-2="#a9822f"
+        ></elevenlabs-convai>
+      </div>
+    </section>
+
+    <section>
+      <h2>Recap<span class="rule"></span></h2>
+      <div class="recap-card">
+        <p class="recap-body waiting" id="recap-text">Waiting for the recap to be sent…</p>
+        <div class="recap-meta">
+          <span class="dot" id="status-dot"></span>
+          <span id="status-text">Connecting…</span>
+        </div>
+      </div>
+    </section>
+
+    <footer>Columbia Business School — Entrepreneurial Strategy</footer>
+  </div>
+
+  <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
+  <script>
+    let lastTimestamp = null;
+
+    async function poll() {
+      try {
+        const res = await fetch('/api/recap', { cache: 'no-store' });
+        const data = await res.json();
+
+        document.getElementById('status-dot').classList.add('live');
+        document.getElementById('status-text').textContent = 'Live';
+
+        if (data.recap && data.recap.timestamp !== lastTimestamp) {
+          lastTimestamp = data.recap.timestamp;
+          const el = document.getElementById('recap-text');
+          el.textContent = data.recap.summary;
+          el.classList.remove('waiting');
+          document.getElementById('status-text').textContent =
+            'Received ' + new Date(data.recap.timestamp).toLocaleTimeString();
+        }
+      } catch (e) {
+        document.getElementById('status-text').textContent = 'Connection error, retrying…';
+      } finally {
+        setTimeout(poll, 2000);
+      }
+    }
+
+    poll();
+  </script>
+</body>
+</html>
