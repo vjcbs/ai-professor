@@ -82,6 +82,32 @@
 
   .status-dot.live { background: var(--teal); }
 
+  .mode-toggle {
+    display: flex;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 3px;
+  }
+
+  .mode-btn {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+
+  .mode-btn.active {
+    background: var(--lime);
+    color: #12140f;
+  }
+
+  .mode-btn:disabled { cursor: default; opacity: 0.6; }
+
   main {
     display: grid;
     grid-template-columns: 1.4fr 1fr;
@@ -353,6 +379,10 @@
       <span class="brand-name">Case Partner</span>
     </div>
     <div class="header-right">
+      <div class="mode-toggle" id="mode-toggle">
+        <button class="mode-btn" data-mode="debate">Debate</button>
+        <button class="mode-btn active" data-mode="quiz">Quiz Me</button>
+      </div>
       <input type="text" id="name-input" placeholder="Enter your name" />
       <div class="status-pill">
         <span class="status-dot" id="status-dot"></span>
@@ -363,14 +393,14 @@
 
   <main>
     <div class="left-col">
-      <p class="eyebrow">COLD-CALL PREPARATION</p>
-      <h1>Think it through out loud.</h1>
-      <p class="intro">I'll challenge your reasoning, help you connect the evidence, and keep the conversation moving.</p>
+      <p class="eyebrow" id="eyebrow">COLD-CALL PREPARATION</p>
+      <h1 id="headline">Think it through out loud.</h1>
+      <p class="intro" id="intro">I'll challenge your reasoning, help you connect the evidence, and keep the conversation moving.</p>
 
       <div class="question-card">
         <p class="question-label" id="question-label">Your first question</p>
         <div id="pre-start-question">
-          <p class="question-text">Your question will appear here once you start.</p>
+          <p class="question-text" id="pre-start-text">Your question will appear here once you start.</p>
         </div>
         <div id="transcript-list" class="transcript-list" style="display:none;"></div>
       </div>
@@ -457,6 +487,52 @@
 
     let conversation = null;
     let firstAgentMessageShown = false;
+    let selectedMode = 'quiz';
+
+    const modeCopy = {
+      quiz: {
+        eyebrow: 'COLD-CALL PREPARATION',
+        headline: "Think it through out loud.",
+        intro: "I'll challenge your reasoning, help you connect the evidence, and keep the conversation moving.",
+        questionLabel: 'Your first question',
+        preStartText: 'Your question will appear here once you start.',
+      },
+      debate: {
+        eyebrow: 'CASE DEBATE',
+        headline: 'Defend your thesis.',
+        intro: "State your position on Sun Yu's bet. I'll push back with case evidence and course frameworks, and let you defend it.",
+        questionLabel: 'Your opening move',
+        preStartText: "State your thesis on Sun Yu's bet whenever you're ready.",
+      },
+    };
+
+    const modeToggle = document.getElementById('mode-toggle');
+    const eyebrowEl = document.getElementById('eyebrow');
+    const headlineEl = document.getElementById('headline');
+    const introEl = document.getElementById('intro');
+    const questionLabelEl = document.getElementById('question-label');
+    const preStartTextEl = document.getElementById('pre-start-text');
+
+    function applyMode(mode) {
+      selectedMode = mode;
+      const copy = modeCopy[mode];
+      eyebrowEl.textContent = copy.eyebrow;
+      headlineEl.textContent = copy.headline;
+      introEl.textContent = copy.intro;
+      questionLabelEl.textContent = copy.questionLabel;
+      preStartTextEl.textContent = copy.preStartText;
+
+      modeToggle.querySelectorAll('.mode-btn').forEach((btn) => {
+        btn.classList.toggle('active', btn.dataset.mode === mode);
+      });
+    }
+
+    modeToggle.querySelectorAll('.mode-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        if (conversation) return; // don't allow switching mid-conversation
+        applyMode(btn.dataset.mode);
+      });
+    });
 
     const orb = document.getElementById('orb');
     const speakBtn = document.getElementById('speak-btn');
@@ -496,6 +572,7 @@
           speakLabel.textContent = 'End session';
           statusDot.classList.add('live');
           statusLabel.textContent = 'Live session';
+          modeToggle.querySelectorAll('.mode-btn').forEach((b) => (b.disabled = true));
         },
         onDisconnect: () => {
           speakBtn.classList.remove('active');
@@ -504,6 +581,7 @@
           statusLabel.textContent = 'Ready';
           orb.classList.remove('speaking', 'listening');
           orbTitle.textContent = "I'm ready when you are.";
+          modeToggle.querySelectorAll('.mode-btn').forEach((b) => (b.disabled = false));
           conversation = null;
         },
         onMessage: (msg) => {
@@ -519,7 +597,8 @@
         onError: (e) => console.error('Conversation error:', e),
       };
 
-      if (name) opts.dynamicVariables = { user_name: name };
+      if (name) opts.dynamicVariables = { user_name: name, mode: selectedMode };
+      else opts.dynamicVariables = { mode: selectedMode };
 
       try {
         conversation = await Conversation.startSession(opts);
