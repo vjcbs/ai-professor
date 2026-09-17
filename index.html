@@ -2,69 +2,240 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>The Case Partner — Neurovista</title>
+<title>AI Professor</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
     --ink: #1c1a16;
-    --paper: #f6f2e9;
-    --paper-raised: #fbf8f1;
+    --bg: #ffffff;
+    --panel: #fafafa;
+    --stripe: #f2f2f2;
+    --border: #e4e4e4;
+    --muted: #8a8a8a;
     --navy: #1b2a4a;
-    --brass: #a9822f;
-    --rule: #ddd4bf;
-    --muted: #8a8272;
   }
 
   * { box-sizing: border-box; }
 
   body {
     margin: 0;
-    background: var(--paper);
+    background: var(--bg);
     color: var(--ink);
-    font-family: 'Inter', -apple-system, sans-serif;
-    -webkit-font-smoothing: antialiased;
-  }
-
-  .page {
-    max-width: 720px;
-    margin: 0 auto;
-    padding: 56px 24px 80px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   }
 
   header {
-    border-bottom: 2px solid var(--navy);
-    padding-bottom: 20px;
-    margin-bottom: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 28px;
+    border-bottom: 1px solid var(--border);
   }
 
   .wordmark {
-    font-family: 'Source Serif 4', Georgia, serif;
     font-weight: 600;
-    font-size: 30px;
-    color: var(--navy);
-    letter-spacing: -0.01em;
+    font-size: 18px;
     margin: 0;
   }
 
-  .kicker {
-    font-family: 'Source Serif 4', Georgia, serif;
-    font-style: italic;
-    font-size: 16px;
-    color: var(--muted);
-    margin: 6px 0 0;
+  #name-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
 
-  section {
-    margin-bottom: 44px;
+  #name-input {
+    font-size: 13px;
+    padding: 7px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    width: 150px;
+  }
+
+  main {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 620px;
+  }
+
+  @media (max-width: 780px) {
+    main { grid-template-columns: 1fr; }
+  }
+
+  .orb-side {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-image: repeating-linear-gradient(
+      135deg, var(--stripe), var(--stripe) 10px, transparent 10px, transparent 20px
+    );
+    border-right: 1px solid var(--border);
+    padding: 40px;
+  }
+
+  .orb-wrap {
+    position: relative;
+    width: 260px;
+    height: 260px;
+  }
+
+  .orb {
+    width: 260px;
+    height: 260px;
+    border-radius: 50%;
+    background: conic-gradient(
+      from 0deg,
+      #0a2472, #38bdf8, #99f6e4, #1d4ed8, #0a2472,
+      #2dd4bf, #1e3a8a, #67e8f9, #0a2472
+    );
+    filter: blur(3px) saturate(1.1);
+    box-shadow: 0 0 70px rgba(30, 64, 175, 0.25);
+    animation: spin 7s linear infinite;
+    transition: filter 0.3s ease;
+  }
+
+  .orb.speaking { animation-duration: 2.2s; filter: blur(2px) saturate(1.3); }
+  .orb.listening { animation-duration: 4s; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .call-btn {
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--ink);
+    border: 4px solid white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  }
+
+  .call-btn.active { background: #c0392b; }
+
+  .call-btn svg { width: 22px; height: 22px; fill: white; }
+
+  .controls-row {
+    margin-top: 56px;
+    display: flex;
+    gap: 10px;
+  }
+
+  .pill-btn {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 16px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: white;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  .pill-btn svg { width: 16px; height: 16px; }
+  .pill-btn:disabled { opacity: 0.4; cursor: default; }
+
+  .chat-side {
+    display: flex;
+    flex-direction: column;
+    background: white;
+  }
+
+  #transcript {
+    flex: 1;
+    padding: 28px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  #empty-state {
+    margin: auto;
+    text-align: center;
+    color: var(--muted);
+  }
+
+  #empty-state .bubble-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--panel);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 14px;
+  }
+
+  .msg {
+    max-width: 75%;
+    padding: 10px 14px;
+    border-radius: 14px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .msg.agent {
+    align-self: flex-start;
+    background: var(--panel);
+    color: var(--ink);
+  }
+
+  .msg.user {
+    align-self: flex-end;
+    background: var(--navy);
+    color: white;
+  }
+
+  .input-row {
+    display: flex;
+    gap: 10px;
+    padding: 18px 24px;
+    border-top: 1px solid var(--border);
+  }
+
+  #text-input {
+    flex: 1;
+    padding: 13px 16px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 14px;
+  }
+
+  #text-input:focus { outline: none; border-color: var(--navy); }
+
+  #send-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--ink);
+    border: none;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #send-btn svg { width: 16px; height: 16px; fill: white; }
+
+  section.recap-section {
+    max-width: 640px;
+    margin: 48px auto 0;
+    padding: 0 24px 60px;
   }
 
   h2 {
-    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 18px;
     font-weight: 600;
-    font-size: 19px;
     color: var(--navy);
     margin: 0 0 14px;
     display: flex;
@@ -72,108 +243,203 @@
     gap: 10px;
   }
 
-  h2 .rule {
-    flex: 1;
-    height: 1px;
-    background: var(--rule);
-  }
-
-  .widget-frame {
-    background: var(--paper-raised);
-    border: 1px solid var(--rule);
-    border-radius: 4px;
-    padding: 28px;
-    min-height: 120px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+  h2 .rule { flex: 1; height: 1px; background: var(--border); }
 
   .recap-card {
-    background: var(--paper-raised);
-    border: 1px solid var(--rule);
-    border-left: 3px solid var(--brass);
-    border-radius: 2px;
-    padding: 26px 28px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-left: 3px solid #a9822f;
+    border-radius: 4px;
+    padding: 24px 26px;
   }
 
-  .recap-body {
-    font-family: 'Source Serif 4', Georgia, serif;
-    font-size: 17px;
-    line-height: 1.7;
-    white-space: pre-wrap;
-    margin: 0;
-  }
-
-  .recap-body.waiting {
-    color: var(--muted);
-    font-style: italic;
-  }
+  .recap-body { font-size: 15.5px; line-height: 1.7; white-space: pre-wrap; margin: 0; }
+  .recap-body.waiting { color: var(--muted); font-style: italic; }
 
   .recap-meta {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 16px;
-    font-size: 13px;
-    color: var(--muted);
+    display: flex; align-items: center; gap: 8px;
+    margin-top: 14px; font-size: 13px; color: var(--muted);
   }
-
-  .dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: #b8b09c;
-  }
-
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: #cfc9b8; }
   .dot.live { background: #4a7c59; }
-
-  footer {
-    font-size: 13px;
-    color: var(--muted);
-    text-align: center;
-    margin-top: 60px;
-  }
 </style>
 </head>
 <body>
-  <div class="page">
-    <header>
-      <p class="wordmark">The Case Partner</p>
-      <p class="kicker">Neurovista — Entrepreneurial Strategy</p>
-    </header>
+  <header>
+    <p class="wordmark">AI Professor</p>
+    <div id="name-row">
+      <input type="text" id="name-input" placeholder="Enter your name" />
+    </div>
+  </header>
 
-    <section>
-      <h2>Discussion<span class="rule"></span></h2>
-      <div class="widget-frame">
-        <elevenlabs-convai
-          agent-id="agent_5801m1w335epekzvayexhg7cpxes"
-          variant="expanded"
-          avatar-orb-color-1="#1b2a4a"
-          avatar-orb-color-2="#a9822f"
-        ></elevenlabs-convai>
-      </div>
-    </section>
-
-    <section>
-      <h2>Recap<span class="rule"></span></h2>
-      <div class="recap-card">
-        <p class="recap-body waiting" id="recap-text">Waiting for the recap to be sent…</p>
-        <div class="recap-meta">
-          <span class="dot" id="status-dot"></span>
-          <span id="status-text">Connecting…</span>
+  <main>
+    <div class="orb-side">
+      <div class="orb-wrap">
+        <div class="orb" id="orb"></div>
+        <div class="call-btn" id="call-btn" title="Start conversation">
+          <svg id="call-icon" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
         </div>
       </div>
-    </section>
 
-    <footer>Columbia Business School — Entrepreneurial Strategy</footer>
-  </div>
+      <div class="controls-row">
+        <button class="pill-btn" id="mute-btn" disabled>
+          <svg viewBox="0 0 24 24" id="mute-icon"><path d="M12 14a3 3 0 003-3V5a3 3 0 00-6 0v6a3 3 0 003 3zm5-3a5 5 0 01-10 0H5a7 7 0 006 6.92V21h2v-3.08A7 7 0 0019 11h-2z"/></svg>
+          <span id="mute-label">Unmute</span>
+        </button>
+      </div>
+    </div>
 
-  <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
-  <script>
+    <div class="chat-side">
+      <div id="transcript">
+        <div id="empty-state">
+          <div class="bubble-icon">
+            <svg viewBox="0 0 24 24" width="20" height="20"><path fill="#999" d="M4 4h16v12H7l-3 3V4z"/></svg>
+          </div>
+          <p>Call or send a message to start<br/>a new conversation</p>
+        </div>
+      </div>
+      <div class="input-row">
+        <input type="text" id="text-input" placeholder="Send a message to start a chat" />
+        <button id="send-btn">
+          <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <section class="recap-section">
+    <h2>Recap<span class="rule"></span></h2>
+    <div class="recap-card">
+      <p class="recap-body waiting" id="recap-text">Waiting for the recap to be sent…</p>
+      <div class="recap-meta">
+        <span class="dot" id="status-dot"></span>
+        <span id="status-text">Connecting…</span>
+      </div>
+    </div>
+  </section>
+
+  <script type="module">
+    import { Conversation } from 'https://cdn.jsdelivr.net/npm/@elevenlabs/client/+esm';
+
+    const AGENT_ID = 'agent_5801m1w335epekzvayexhg7cpxes';
+
+    let conversation = null;
+    let isMuted = false;
+
+    const orb = document.getElementById('orb');
+    const callBtn = document.getElementById('call-btn');
+    const callIcon = document.getElementById('call-icon');
+    const muteBtn = document.getElementById('mute-btn');
+    const muteLabel = document.getElementById('mute-label');
+    const transcript = document.getElementById('transcript');
+    const emptyState = document.getElementById('empty-state');
+    const textInput = document.getElementById('text-input');
+    const sendBtn = document.getElementById('send-btn');
+    const nameInput = document.getElementById('name-input');
+
+    const HANGUP_ICON = '<path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08c-.18-.17-.29-.42-.29-.7 0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 3.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28-.79-.74-1.68-1.36-2.66-1.85-.33-.16-.56-.51-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/>';
+    const CALL_ICON = document.getElementById('call-icon').innerHTML;
+
+    function addMessage(text, source) {
+      emptyState.style.display = 'none';
+      const div = document.createElement('div');
+      div.className = 'msg ' + (source === 'user' ? 'user' : 'agent');
+      div.textContent = text;
+      transcript.appendChild(div);
+      transcript.scrollTop = transcript.scrollHeight;
+    }
+
+    async function startConversation(initialText) {
+      if (conversation) return;
+
+      const name = nameInput.value.trim();
+      const opts = {
+        agentId: AGENT_ID,
+        onConnect: () => {
+          callBtn.classList.add('active');
+          callIcon.innerHTML = HANGUP_ICON;
+          muteBtn.disabled = false;
+        },
+        onDisconnect: () => {
+          callBtn.classList.remove('active');
+          callIcon.innerHTML = CALL_ICON;
+          muteBtn.disabled = true;
+          orb.classList.remove('speaking', 'listening');
+          conversation = null;
+        },
+        onMessage: (msg) => {
+          if (msg && msg.message) {
+            addMessage(msg.message, msg.source);
+          }
+        },
+        onModeChange: (m) => {
+          orb.classList.toggle('speaking', m.mode === 'speaking');
+          orb.classList.toggle('listening', m.mode === 'listening');
+        },
+        onError: (e) => {
+          console.error('Conversation error:', e);
+        },
+      };
+
+      if (name) {
+        opts.dynamicVariables = { user_name: name };
+      }
+
+      try {
+        conversation = await Conversation.startSession(opts);
+        if (initialText) {
+          conversation.sendUserMessage(initialText);
+        }
+      } catch (e) {
+        console.error('Failed to start conversation:', e);
+      }
+    }
+
+    async function endConversation() {
+      if (!conversation) return;
+      await conversation.endSession();
+      conversation = null;
+    }
+
+    callBtn.addEventListener('click', () => {
+      if (conversation) {
+        endConversation();
+      } else {
+        startConversation();
+      }
+    });
+
+    muteBtn.addEventListener('click', () => {
+      if (!conversation) return;
+      isMuted = !isMuted;
+      if (typeof conversation.setMicMuted === 'function') {
+        conversation.setMicMuted(isMuted);
+      }
+      muteLabel.textContent = isMuted ? 'Muted' : 'Unmute';
+    });
+
+    async function handleSend() {
+      const text = textInput.value.trim();
+      if (!text) return;
+      textInput.value = '';
+
+      if (!conversation) {
+        await startConversation(text);
+      } else {
+        addMessage(text, 'user');
+        conversation.sendUserMessage(text);
+      }
+    }
+
+    sendBtn.addEventListener('click', handleSend);
+    textInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') handleSend();
+    });
+
+    // --- Recap polling ---
     let lastTimestamp = null;
 
-    async function poll() {
+    async function pollRecap() {
       try {
         const res = await fetch('/api/recap', { cache: 'no-store' });
         const data = await res.json();
@@ -192,11 +458,11 @@
       } catch (e) {
         document.getElementById('status-text').textContent = 'Connection error, retrying…';
       } finally {
-        setTimeout(poll, 2000);
+        setTimeout(pollRecap, 2000);
       }
     }
 
-    poll();
+    pollRecap();
   </script>
 </body>
 </html>
