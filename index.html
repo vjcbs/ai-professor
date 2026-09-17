@@ -2,17 +2,19 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>AI Professor</title>
+<title>Case Partner</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <style>
   :root {
-    --ink: #1c1a16;
-    --bg: #ffffff;
-    --panel: #fafafa;
-    --stripe: #f2f2f2;
-    --border: #e4e4e4;
-    --muted: #8a8a8a;
-    --navy: #1b2a4a;
+    --bg: #0e100f;
+    --panel: #171b19;
+    --panel-2: #14201c;
+    --border: #262b28;
+    --text: #eef0ec;
+    --muted: #99a39c;
+    --gold: #d8b45e;
+    --lime: #cddd7a;
+    --teal: #35d399;
   }
 
   * { box-sizing: border-box; }
@@ -20,7 +22,7 @@
   body {
     margin: 0;
     background: var(--bg);
-    color: var(--ink);
+    color: var(--text);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   }
 
@@ -32,288 +34,419 @@
     border-bottom: 1px solid var(--border);
   }
 
-  .wordmark {
-    font-weight: 600;
-    font-size: 18px;
-    margin: 0;
-  }
-
-  #name-row {
+  .brand {
     display: flex;
     align-items: center;
-    gap: 8px;
-  }
-
-  #name-input {
-    font-size: 13px;
-    padding: 7px 10px;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    width: 150px;
-  }
-
-  main {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    min-height: 620px;
-  }
-
-  @media (max-width: 780px) {
-    main { grid-template-columns: 1fr; }
-  }
-
-  .orb-side {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background-image: repeating-linear-gradient(
-      135deg, var(--stripe), var(--stripe) 10px, transparent 10px, transparent 20px
-    );
-    border-right: 1px solid var(--border);
-    padding: 40px;
-  }
-
-  .orb-wrap {
-    position: relative;
-    width: 260px;
-    height: 260px;
-  }
-
-  .orb {
-    width: 260px;
-    height: 260px;
-    border-radius: 50%;
-    background: conic-gradient(
-      from 0deg,
-      #0a2472, #38bdf8, #99f6e4, #1d4ed8, #0a2472,
-      #2dd4bf, #1e3a8a, #67e8f9, #0a2472
-    );
-    filter: blur(3px) saturate(1.1);
-    box-shadow: 0 0 70px rgba(30, 64, 175, 0.25);
-    animation: spin 7s linear infinite;
-    transition: filter 0.3s ease;
-  }
-
-  .orb.speaking { animation-duration: 2.2s; filter: blur(2px) saturate(1.3); }
-  .orb.listening { animation-duration: 4s; }
-
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  .call-btn {
-    position: absolute;
-    bottom: -6px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background: var(--ink);
-    border: 4px solid white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-  }
-
-  .call-btn.active { background: #c0392b; }
-
-  .call-btn svg { width: 22px; height: 22px; fill: white; }
-
-  .controls-row {
-    margin-top: 56px;
-    display: flex;
     gap: 10px;
   }
 
-  .pill-btn {
+  .brand-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+    background: conic-gradient(from 0deg, #1e40af, #5eead4, #a78bfa, #1e40af);
+  }
+
+  .brand-name { font-weight: 600; font-size: 15px; }
+
+  #name-input {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 13px;
+    padding: 7px 12px;
+    border-radius: 6px;
+    width: 140px;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .status-pill {
     display: flex;
     align-items: center;
     gap: 7px;
-    padding: 10px 16px;
-    border-radius: 999px;
-    border: 1px solid var(--border);
-    background: white;
-    font-size: 14px;
-    cursor: pointer;
-  }
-
-  .pill-btn svg { width: 16px; height: 16px; }
-  .pill-btn:disabled { opacity: 0.4; cursor: default; }
-
-  .chat-side {
-    display: flex;
-    flex-direction: column;
-    background: white;
-  }
-
-  #transcript {
-    flex: 1;
-    padding: 28px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  #empty-state {
-    margin: auto;
-    text-align: center;
+    font-size: 13px;
     color: var(--muted);
   }
 
-  #empty-state .bubble-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    background: var(--panel);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 14px;
+  .status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--muted);
   }
 
-  .msg {
-    max-width: 75%;
-    padding: 10px 14px;
-    border-radius: 14px;
+  .status-dot.live { background: var(--teal); }
+
+  main {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 0;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  @media (max-width: 860px) {
+    main { grid-template-columns: 1fr; }
+  }
+
+  .left-col {
+    padding: 48px 40px;
+    border-right: 1px solid var(--border);
+  }
+
+  .eyebrow {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--gold);
+    margin: 0 0 14px;
+  }
+
+  h1 {
+    font-size: 34px;
+    font-weight: 700;
+    margin: 0 0 16px;
+    letter-spacing: -0.01em;
+  }
+
+  .intro {
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1.6;
+    max-width: 480px;
+    margin: 0 0 28px;
+  }
+
+  .question-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 22px 24px;
+    margin-bottom: 36px;
+  }
+
+  .question-label {
+    font-size: 12px;
+    color: var(--muted);
+    margin: 0 0 8px;
+  }
+
+  .question-text {
+    font-size: 19px;
+    font-weight: 500;
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  .transcript-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 220px;
+    overflow-y: auto;
+  }
+
+  .transcript-line {
     font-size: 14px;
     line-height: 1.5;
   }
 
-  .msg.agent {
-    align-self: flex-start;
-    background: var(--panel);
-    color: var(--ink);
+  .transcript-line .who {
+    color: var(--muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 2px;
   }
 
-  .msg.user {
-    align-self: flex-end;
-    background: var(--navy);
-    color: white;
-  }
-
-  .input-row {
-    display: flex;
-    gap: 10px;
-    padding: 18px 24px;
-    border-top: 1px solid var(--border);
-  }
-
-  #text-input {
-    flex: 1;
-    padding: 13px 16px;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    font-size: 14px;
-  }
-
-  #text-input:focus { outline: none; border-color: var(--navy); }
-
-  #send-btn {
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
-    background: var(--ink);
-    border: none;
-    color: white;
-    cursor: pointer;
+  .orb-row {
     display: flex;
     align-items: center;
-    justify-content: center;
+    gap: 20px;
+    margin-bottom: 28px;
   }
 
-  #send-btn svg { width: 16px; height: 16px; fill: white; }
+  .orb {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: conic-gradient(
+      from 0deg, #0a2472, #38bdf8, #99f6e4, #1d4ed8, #0a2472,
+      #2dd4bf, #1e3a8a, #67e8f9, #0a2472
+    );
+    filter: blur(2px) saturate(1.1);
+    box-shadow: 0 0 40px rgba(56, 189, 248, 0.15);
+    animation: spin 7s linear infinite;
+  }
+
+  .orb.speaking { animation-duration: 2.2s; }
+  .orb.listening { animation-duration: 4s; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .orb-status-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0 0 4px;
+  }
+
+  .orb-status-sub {
+    font-size: 14px;
+    color: var(--muted);
+    margin: 0;
+  }
+
+  .bottom-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    gap: 20px;
+  }
+
+  .bottom-note {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .speak-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: transparent;
+    border: 1px solid var(--lime);
+    color: var(--text);
+    padding: 12px 22px;
+    border-radius: 999px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .speak-btn .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--lime);
+  }
+
+  .speak-btn.active { border-color: #e08a6b; }
+  .speak-btn.active .dot { background: #e08a6b; }
+
+  .right-col {
+    padding: 48px 36px;
+  }
+
+  .right-col h2 {
+    font-size: 17px;
+    font-weight: 600;
+    margin: 0 0 24px;
+  }
+
+  .step {
+    display: flex;
+    gap: 14px;
+    padding-bottom: 24px;
+    position: relative;
+  }
+
+  .step:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: 9px;
+    top: 24px;
+    bottom: 0;
+    width: 1px;
+    background: var(--border);
+  }
+
+  .step-marker {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .step.active .step-marker {
+    border-color: var(--lime);
+    background: radial-gradient(circle, var(--lime) 30%, transparent 32%);
+  }
+
+  .step-title { font-weight: 600; font-size: 15px; margin: 0 0 4px; }
+  .step-desc { font-size: 13.5px; color: var(--muted); line-height: 1.5; margin: 0; }
+
+  .case-context {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 22px;
+    margin-top: 8px;
+  }
+
+  .case-context .label { font-weight: 600; font-size: 14px; margin: 0 0 8px; }
+  .case-context p { font-size: 13.5px; color: var(--muted); line-height: 1.6; margin: 0; }
+
+  footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 24px 40px;
+    border-top: 1px solid var(--border);
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .footer-label { font-weight: 600; font-size: 15px; margin: 0 0 4px; }
+  .footer-desc { font-size: 13.5px; color: var(--muted); max-width: 560px; line-height: 1.5; margin: 0; }
+
+  .coaching-pill {
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    padding: 9px 18px;
+    border-radius: 999px;
+    font-size: 13.5px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
 
   section.recap-section {
-    max-width: 640px;
-    margin: 48px auto 0;
-    padding: 0 24px 60px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 32px 40px 60px;
   }
 
-  h2 {
-    font-size: 18px;
+  .recap-heading {
+    font-size: 15px;
     font-weight: 600;
-    color: var(--navy);
-    margin: 0 0 14px;
-    display: flex;
-    align-items: baseline;
-    gap: 10px;
+    color: var(--muted);
+    margin: 0 0 12px;
   }
-
-  h2 .rule { flex: 1; height: 1px; background: var(--border); }
 
   .recap-card {
     background: var(--panel);
     border: 1px solid var(--border);
-    border-left: 3px solid #a9822f;
-    border-radius: 4px;
-    padding: 24px 26px;
+    border-left: 3px solid var(--gold);
+    border-radius: 8px;
+    padding: 22px 24px;
   }
 
-  .recap-body { font-size: 15.5px; line-height: 1.7; white-space: pre-wrap; margin: 0; }
+  .recap-body { font-size: 15px; line-height: 1.7; white-space: pre-wrap; margin: 0; color: var(--text); }
   .recap-body.waiting { color: var(--muted); font-style: italic; }
-
-  .recap-meta {
-    display: flex; align-items: center; gap: 8px;
-    margin-top: 14px; font-size: 13px; color: var(--muted);
-  }
-  .dot { width: 7px; height: 7px; border-radius: 50%; background: #cfc9b8; }
-  .dot.live { background: #4a7c59; }
+  .recap-meta { display: flex; align-items: center; gap: 8px; margin-top: 14px; font-size: 13px; color: var(--muted); }
 </style>
 </head>
 <body>
   <header>
-    <p class="wordmark">AI Professor</p>
-    <div id="name-row">
+    <div class="brand">
+      <div class="brand-icon"></div>
+      <span class="brand-name">Case Partner</span>
+    </div>
+    <div class="header-right">
       <input type="text" id="name-input" placeholder="Enter your name" />
+      <div class="status-pill">
+        <span class="status-dot" id="status-dot"></span>
+        <span id="status-label">Ready</span>
+      </div>
     </div>
   </header>
 
   <main>
-    <div class="orb-side">
-      <div class="orb-wrap">
+    <div class="left-col">
+      <p class="eyebrow">COLD-CALL PREPARATION</p>
+      <h1>Think it through out loud.</h1>
+      <p class="intro">I'll challenge your reasoning, help you connect the evidence, and keep the conversation moving.</p>
+
+      <div class="question-card">
+        <p class="question-label" id="question-label">Your first question</p>
+        <div id="pre-start-question">
+          <p class="question-text">Your question will appear here once you start.</p>
+        </div>
+        <div id="transcript-list" class="transcript-list" style="display:none;"></div>
+      </div>
+
+      <div class="orb-row">
         <div class="orb" id="orb"></div>
-        <div class="call-btn" id="call-btn" title="Start conversation">
-          <svg id="call-icon" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+        <div>
+          <p class="orb-status-title" id="orb-title">I'm ready when you are.</p>
+          <p class="orb-status-sub">Speak naturally. Pause, rethink, or interrupt me at any time.</p>
         </div>
       </div>
 
-      <div class="controls-row">
-        <button class="pill-btn" id="mute-btn" disabled>
-          <svg viewBox="0 0 24 24" id="mute-icon"><path d="M12 14a3 3 0 003-3V5a3 3 0 00-6 0v6a3 3 0 003 3zm5-3a5 5 0 01-10 0H5a7 7 0 006 6.92V21h2v-3.08A7 7 0 0019 11h-2z"/></svg>
-          <span id="mute-label">Unmute</span>
+      <div class="bottom-row">
+        <p class="bottom-note">Voice discussion · Microphone required<br/>Live transcript and recap appear automatically.</p>
+        <button class="speak-btn" id="speak-btn">
+          <span class="dot"></span>
+          <span id="speak-label">Start speaking</span>
         </button>
       </div>
     </div>
 
-    <div class="chat-side">
-      <div id="transcript">
-        <div id="empty-state">
-          <div class="bubble-icon">
-            <svg viewBox="0 0 24 24" width="20" height="20"><path fill="#999" d="M4 4h16v12H7l-3 3V4z"/></svg>
-          </div>
-          <p>Call or send a message to start<br/>a new conversation</p>
+    <div class="right-col">
+      <h2>Your thinking map</h2>
+
+      <div class="step active">
+        <div class="step-marker"></div>
+        <div>
+          <p class="step-title">Make your thesis</p>
+          <p class="step-desc">State a position before we unpack it.</p>
         </div>
       </div>
-      <div class="input-row">
-        <input type="text" id="text-input" placeholder="Send a message to start a chat" />
-        <button id="send-btn">
-          <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
-        </button>
+      <div class="step">
+        <div class="step-marker"></div>
+        <div>
+          <p class="step-title">Use case evidence</p>
+          <p class="step-desc">Anchor it in a decision, fact, or figure from the case.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-marker"></div>
+        <div>
+          <p class="step-title">Consider tradeoffs</p>
+          <p class="step-desc">Name what your recommendation risks.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-marker"></div>
+        <div>
+          <p class="step-title">Refine your answer</p>
+          <p class="step-desc">Turn feedback into a sharper final response.</p>
+        </div>
+      </div>
+
+      <div class="case-context">
+        <p class="label">Case context</p>
+        <p>Neurovista is a China-manufactured, noninvasive BCI startup betting on a consumer sleep-monitoring patch, while eyeing a much larger — and unproven — neurological diagnostics platform.</p>
       </div>
     </div>
   </main>
 
+  <footer>
+    <div>
+      <p class="footer-label">After this session</p>
+      <p class="footer-desc">You'll leave with your strongest argument, the evidence you missed, and a recap sent automatically.</p>
+    </div>
+    <div class="coaching-pill">Live coaching</div>
+  </footer>
+
   <section class="recap-section">
-    <h2>Recap<span class="rule"></span></h2>
+    <p class="recap-heading">Recap</p>
     <div class="recap-card">
       <p class="recap-body waiting" id="recap-text">Waiting for the recap to be sent…</p>
       <div class="recap-meta">
-        <span class="dot" id="status-dot"></span>
-        <span id="status-text">Connecting…</span>
+        <span class="status-dot" id="recap-dot"></span>
+        <span id="recap-status-text">Connecting…</span>
       </div>
     </div>
   </section>
@@ -324,117 +457,79 @@
     const AGENT_ID = 'agent_5801m1w335epekzvayexhg7cpxes';
 
     let conversation = null;
-    let isMuted = false;
+    let firstAgentMessageShown = false;
 
     const orb = document.getElementById('orb');
-    const callBtn = document.getElementById('call-btn');
-    const callIcon = document.getElementById('call-icon');
-    const muteBtn = document.getElementById('mute-btn');
-    const muteLabel = document.getElementById('mute-label');
-    const transcript = document.getElementById('transcript');
-    const emptyState = document.getElementById('empty-state');
-    const textInput = document.getElementById('text-input');
-    const sendBtn = document.getElementById('send-btn');
+    const speakBtn = document.getElementById('speak-btn');
+    const speakLabel = document.getElementById('speak-label');
+    const statusDot = document.getElementById('status-dot');
+    const statusLabel = document.getElementById('status-label');
+    const orbTitle = document.getElementById('orb-title');
+    const preStartQuestion = document.getElementById('pre-start-question');
+    const transcriptList = document.getElementById('transcript-list');
     const nameInput = document.getElementById('name-input');
 
-    const HANGUP_ICON = '<path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08c-.18-.17-.29-.42-.29-.7 0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 3.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28-.79-.74-1.68-1.36-2.66-1.85-.33-.16-.56-.51-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/>';
-    const CALL_ICON = document.getElementById('call-icon').innerHTML;
-
-    function addMessage(text, source) {
-      emptyState.style.display = 'none';
-      const div = document.createElement('div');
-      div.className = 'msg ' + (source === 'user' ? 'user' : 'agent');
-      div.textContent = text;
-      transcript.appendChild(div);
-      transcript.scrollTop = transcript.scrollHeight;
+    function addTranscriptLine(text, source) {
+      if (!firstAgentMessageShown && source !== 'user') {
+        preStartQuestion.style.display = 'none';
+        transcriptList.style.display = 'flex';
+        firstAgentMessageShown = true;
+      }
+      const line = document.createElement('div');
+      line.className = 'transcript-line';
+      line.innerHTML = '<div class="who">' + (source === 'user' ? 'You' : 'Case Partner') + '</div>' + text;
+      transcriptList.appendChild(line);
+      transcriptList.scrollTop = transcriptList.scrollHeight;
     }
 
-    async function startConversation(initialText) {
-      if (conversation) return;
+    async function startConversation() {
+      if (conversation) {
+        await conversation.endSession();
+        conversation = null;
+        return;
+      }
 
       const name = nameInput.value.trim();
       const opts = {
         agentId: AGENT_ID,
         onConnect: () => {
-          callBtn.classList.add('active');
-          callIcon.innerHTML = HANGUP_ICON;
-          muteBtn.disabled = false;
+          speakBtn.classList.add('active');
+          speakLabel.textContent = 'End session';
+          statusDot.classList.add('live');
+          statusLabel.textContent = 'Live session';
         },
         onDisconnect: () => {
-          callBtn.classList.remove('active');
-          callIcon.innerHTML = CALL_ICON;
-          muteBtn.disabled = true;
+          speakBtn.classList.remove('active');
+          speakLabel.textContent = 'Start speaking';
+          statusDot.classList.remove('live');
+          statusLabel.textContent = 'Ready';
           orb.classList.remove('speaking', 'listening');
+          orbTitle.textContent = "I'm ready when you are.";
           conversation = null;
         },
         onMessage: (msg) => {
           if (msg && msg.message) {
-            addMessage(msg.message, msg.source);
+            addTranscriptLine(msg.message, msg.source);
           }
         },
         onModeChange: (m) => {
           orb.classList.toggle('speaking', m.mode === 'speaking');
           orb.classList.toggle('listening', m.mode === 'listening');
+          orbTitle.textContent = m.mode === 'speaking' ? 'Speaking…' : 'Listening…';
         },
-        onError: (e) => {
-          console.error('Conversation error:', e);
-        },
+        onError: (e) => console.error('Conversation error:', e),
       };
 
-      if (name) {
-        opts.dynamicVariables = { user_name: name };
-      }
+      if (name) opts.dynamicVariables = { user_name: name };
 
       try {
         conversation = await Conversation.startSession(opts);
-        if (initialText) {
-          conversation.sendUserMessage(initialText);
-        }
       } catch (e) {
         console.error('Failed to start conversation:', e);
       }
     }
 
-    async function endConversation() {
-      if (!conversation) return;
-      await conversation.endSession();
-      conversation = null;
-    }
-
-    callBtn.addEventListener('click', () => {
-      if (conversation) {
-        endConversation();
-      } else {
-        startConversation();
-      }
-    });
-
-    muteBtn.addEventListener('click', () => {
-      if (!conversation) return;
-      isMuted = !isMuted;
-      if (typeof conversation.setMicMuted === 'function') {
-        conversation.setMicMuted(isMuted);
-      }
-      muteLabel.textContent = isMuted ? 'Muted' : 'Unmute';
-    });
-
-    async function handleSend() {
-      const text = textInput.value.trim();
-      if (!text) return;
-      textInput.value = '';
-
-      if (!conversation) {
-        await startConversation(text);
-      } else {
-        addMessage(text, 'user');
-        conversation.sendUserMessage(text);
-      }
-    }
-
-    sendBtn.addEventListener('click', handleSend);
-    textInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') handleSend();
-    });
+    speakBtn.addEventListener('click', startConversation);
 
     // --- Recap polling ---
     let lastTimestamp = null;
@@ -444,19 +539,19 @@
         const res = await fetch('/api/recap', { cache: 'no-store' });
         const data = await res.json();
 
-        document.getElementById('status-dot').classList.add('live');
-        document.getElementById('status-text').textContent = 'Live';
+        document.getElementById('recap-dot').classList.add('live');
+        document.getElementById('recap-status-text').textContent = 'Live';
 
         if (data.recap && data.recap.timestamp !== lastTimestamp) {
           lastTimestamp = data.recap.timestamp;
           const el = document.getElementById('recap-text');
           el.textContent = data.recap.summary;
           el.classList.remove('waiting');
-          document.getElementById('status-text').textContent =
+          document.getElementById('recap-status-text').textContent =
             'Received ' + new Date(data.recap.timestamp).toLocaleTimeString();
         }
       } catch (e) {
-        document.getElementById('status-text').textContent = 'Connection error, retrying…';
+        document.getElementById('recap-status-text').textContent = 'Connection error, retrying…';
       } finally {
         setTimeout(pollRecap, 2000);
       }
