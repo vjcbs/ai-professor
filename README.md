@@ -3,8 +3,7 @@
 A voice-based case-study debate/quiz coach built on ElevenLabs Conversational
 AI, grounded in the Neurovista case (Columbia CaseWorks) and its accompanying
 course readings (Gans/Scott/Stern, Guzman lecture notes, Saffo's forecasting
-rules). Built for a CBS Entrepreneurial Strategy course submission and
-originally as an ElevenLabs FDE take-home.
+rules).
 
 Live demo: **https://ai-professor-zeta.vercel.app**
 
@@ -113,14 +112,42 @@ The last four are the cross-session memory layer (see below) — together
 they demonstrate both tool-use patterns ElevenLabs supports (webhook and
 client) plus a genuine external system in the loop.
 
-### Cross-session memory (Couchbase Capella)
+### Why Couchbase
+
+The core problem this app is solving is that a single practice session
+doesn't build a skill — repetition does, and repetition only compounds if
+each session knows what happened in the last one. Couchbase is the
+persistence layer that makes that possible: it's what turns "one voice
+conversation" into "a learning record that accumulates over time." A few
+things specifically drive that choice, beyond just the welcome-back moment:
+
+- **Structured signals, not a transcript dump.** Every session is broken
+  down into the pieces that actually matter for coaching — thesis,
+  evidence used, tradeoffs missed, a score, recurring gaps — and written as
+  discrete fields rather than raw text. That's what makes it possible to
+  reason over a student's history programmatically (e.g. "this gap keeps
+  recurring") instead of re-reading a transcript every time.
+- **A student profile that compounds across many sessions, not just two.**
+  `student_profile.weak_areas` and `learning_state.recurring_gaps` merge
+  and accumulate on every write (`save-case-attempt.js`, `Array.from(new
+  Set([...]))`) — the memory isn't "session N vs. session N-1," it's a
+  running profile that gets more accurate the more a student uses it.
+- **Serverless-friendly by design.** The app runs as stateless Vercel
+  functions with no server to hold state in between requests, so
+  persistence has to live outside the process. Couchbase Capella's Data
+  API (REST, key-value) was chosen specifically because it needs no
+  connection pool to manage across cold starts, unlike the stateful
+  Couchbase SDK.
+- **Graceful degradation.** If Couchbase isn't configured or is
+  unreachable, every endpoint fails soft (`isConfigured()` checks, try/
+  catch around each call) and returns a "not configured" response instead
+  of erroring — the live conversation, RAG, and thinking-map still work
+  without memory, so a Couchbase outage degrades the experience rather
+  than breaking it.
 
 There's no login system in this demo — a student's typed name is their
 identity, slugged into a document key (`lib/couchbase.js`). Four data
-shapes are persisted via the Couchbase Capella **Data API** (a REST,
-key-value interface — chosen over the stateful Node SDK because it fits
-serverless functions cleanly, no connection pool to manage across cold
-starts):
+shapes are persisted via the Couchbase Capella Data API:
 
 - `student_profile:{user_id}` — name, course, accumulated weak areas
 - `case_attempt:{user_id}:{timestamp}` (+ a `_latest` mirror for O(1) lookup)
@@ -129,15 +156,15 @@ starts):
   session
 - `prep_brief:{user_id}:{timestamp}` (+ a `_latest` mirror) — final
   recommendation, feedback, and a concrete next-practice prompt
+- `latest_recap` — the most recent session recap, so the recap card
+  survives a Vercel cold start instead of resetting to empty
 
 `getStudentContext` reads `student_profile`, `learning_state`, and the
 latest `case_attempt` in parallel at session start; the system prompt
 instructs the agent to open with a specific callback ("Welcome back, Vani —
 last time you made a strong market-size argument but didn't address the
 regulatory risk...") rather than a generic greeting. The other three tools
-write to this store as a session closes out. If Couchbase env vars aren't
-configured, every endpoint degrades gracefully (returns "not configured"
-instead of erroring) so the rest of the demo still works without memory.
+write to this store as a session closes out.
 
 ---
 
